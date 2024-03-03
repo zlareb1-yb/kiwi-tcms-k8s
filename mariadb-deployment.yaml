@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kiwi-db
+  namespace: kiwitcms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kiwi-db
+  template:
+    metadata:
+      labels:
+        app: kiwi-db
+    spec:
+      volumes:
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: db-data
+      containers:
+        - name: kiwi-db
+          image: mariadb:latest
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: kiwi-1s-aw3s0m3
+            - name: MYSQL_DATABASE
+              value: kiwi
+            - name: MYSQL_USER
+              value: kiwi
+            - name: MYSQL_PASSWORD
+              value: kiwi
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/mysql

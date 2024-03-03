@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kiwi-web
+  namespace: kiwitcms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kiwi-web
+  template:
+    metadata:
+      labels:
+        app: kiwi-web
+    spec:
+      volumes:
+      - name: uploads
+        persistentVolumeClaim:
+          claimName: kiwi-web-uploads-pvc
+      initContainers:
+      - name: set-permissions
+        image: busybox
+        command: ["chmod", "777", "/Kiwi/uploads"]
+        volumeMounts:
+        - name: uploads
+          mountPath: /Kiwi/uploads
+      containers:
+      - name: kiwi-web
+        image: kiwitcms/kiwi:latest
+        ports:
+        - containerPort: 8080
+        - containerPort: 8443
+        volumeMounts:
+        - name: uploads
+          mountPath: /Kiwi/uploads
+        env:
+        - name: KIWI_DB_HOST
+          value: "kiwi-db-service"
+        - name: KIWI_DB_PORT
+          value: "3306"
+        - name: KIWI_DB_NAME
+          value: "kiwi"
+        - name: KIWI_DB_USER
+          value: "kiwi"
+        - name: KIWI_DB_PASSWORD
+          value: "kiwi"
